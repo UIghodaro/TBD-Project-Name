@@ -87,14 +87,20 @@ def draw_landmarks_on_image(rgb_image, detection_result):
 Camera = cv2.VideoCapture(0)                                        # Define the videocapture/livestream
 
 with HandLandmarker.create_from_options(options) as landmarker:    
-    while True:
+    while Camera.isOpened():
         ret, image = Camera.read()                                                    # Get the current webcam image (continuous cause 'while True)
-        rgb_frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)                            # Convert this image to RGB
+
+        if not ret:                                                                   # Making sure?
+           print('empty camera frame')
+           continue
+
+        rgb_frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)                            # Convert the camera frame to RGB
         
         # Convert the frame received from OpenCV to a MediaPipe’s Image object.
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)         # data = numpy_frame_from_opencv
        
         timestamp_ms = int(time.time() * 1000)                                        # Live tracking needs the time for some reason
+        print(f"-----\n {timestamp_ms} \n---------")
         landmarker.detect_async(mp_image, timestamp_ms)                               # Given a converted image, detect everything I guess
 
         #landmarker_result = options.result_callback(HandLandmarkerResult, mp_image, timestamp_ms)
